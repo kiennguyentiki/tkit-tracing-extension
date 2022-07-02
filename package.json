@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "jest": "^28.1.2",
+    "vitest": "^0.16.0"
+  },
+  "dependencies": {
+    "csv-parser": "^3.0.0"
+  }
+}
