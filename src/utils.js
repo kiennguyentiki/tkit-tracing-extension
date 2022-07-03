@@ -1,6 +1,4 @@
-const csv = require("csv-parser");
-const fs = require("fs");
-const path = require("path");
+import Papa from "papaparse";
 
 function normalizeTimestamp(ts) {
   const length = Math.floor(ts).toString().length;
@@ -25,6 +23,7 @@ function addGrpcSpans(root, rows) {
   rows
     .filter((item) => item.grpc_time_ms != "")
     .forEach((item) => {
+      if (!item.grpc_time_ms || !item.grpc_service || !item.grpc_method) return;
       const duration = parseFloat(item.grpc_time_ms);
       const span = {
         type: "grpc",
@@ -78,49 +77,30 @@ function sortSpans(root) {
   });
 }
 
-function printSpan(root, span) {
-  console.log(`
-    <div class="flex flex-row">
-        <div style="width: ${
-          ((span.start - root.start) / root.duration) * 100
-        }%"></div>
-        <div class="px-2 bg-green-500 has-tooltip" style="width: ${
-          (span.duration / root.duration) * 100
-        }%">
-            <span class='tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-8'>${
-              span.name
-            }</span>
-            ${span.type}: ${span.duration}ms
-        </div>
-    </div>
-`);
-  span.children.forEach((item) => printSpan(root, item));
-}
-
-function parseFile(filePath) {
-  let rows = [];
-  fs.createReadStream(filePath)
-    .pipe(csv())
-    .on("data", (data) => rows.push(data))
-    .on("end", () => {
-      // normalize timestamp
-      rows = rows.map((item) => ({
-        ...item,
-        ts: normalizeTimestamp(parseFloat(item.ts)),
-      }));
-
-      // sort log by timestamp
-      rows.sort((a, b) => (a.ts > b.ts ? 1 : a.ts < b.ts ? -1 : 0));
-      const root = getRootSpan(rows);
-      addGrpcSpans(root, rows);
-      addSqlSpans(root, rows);
-      sortSpans(root);
-      console.log(
-        `<div class="relative flex min-h-screen flex-col space-y-1">`
-      );
-      printSpan(root, root);
-      console.log(`</div>`);
+async function parseCsvFile(file) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      header: true,
+      complete: (result) => {
+        resolve(result.data);
+      },
     });
+  });
 }
 
-parseFile(path.join(__dirname, "..", "test", "fixtures", "message1.csv"));
+export async function processFile(file) {
+  let rows = await parseCsvFile(file);
+  // normalize timestamp
+  rows = rows.map((item) => ({
+    ...item,
+    ts: normalizeTimestamp(parseFloat(item.ts)),
+  }));
+
+  // sort log by timestamp
+  rows.sort((a, b) => (a.ts > b.ts ? 1 : a.ts < b.ts ? -1 : 0));
+  const root = getRootSpan(rows);
+  addGrpcSpans(root, rows);
+  addSqlSpans(root, rows);
+  sortSpans(root);
+  return root;
+}
