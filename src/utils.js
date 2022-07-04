@@ -13,6 +13,7 @@ function getRootSpan(rows) {
     lastRow = hasTsRows[hasTsRows.length - 1];
   }
   return {
+    level: 0,
     name: "root",
     type: "root",
     start: firstRow.ts,
@@ -36,6 +37,7 @@ function addGrpcSpans(root, rows) {
         duration: duration,
         end: item.ts,
         children: [],
+        level: root.level + 1,
       };
       root._spanCache[span.name] = span;
       root.children.push(span);
@@ -62,6 +64,7 @@ function addSqlSpans(root, rows) {
         duration,
         end: item.ts,
         children: [],
+        level: grpcSpan.level + 1,
       };
       grpcSpan.children.push(span);
     });
