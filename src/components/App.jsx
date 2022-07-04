@@ -20,7 +20,9 @@ const UploadFile = ({ handleUpload, file }) => {
           "grpc_method",
           "grpc_time_ms",
         ].map((item) => (
-          <li className="pl-2"> + {item}</li>
+          <li key={item} className="pl-2">
+            + {item}
+          </li>
         ))}
       </ul>
       <div className="pb-4">
