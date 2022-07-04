@@ -7,7 +7,11 @@ function normalizeTimestamp(ts) {
 
 function getRootSpan(rows) {
   const firstRow = rows.filter((item) => item.message === "Request started")[0];
-  const lastRow = rows.filter((item) => item.message === "Request finished")[0];
+  let lastRow = rows.filter((item) => item.message === "Request finished")[0];
+  if (!lastRow) {
+    const hasTsRows = rows.filter((item) => item.ts);
+    lastRow = hasTsRows[hasTsRows.length - 1];
+  }
   return {
     name: "root",
     type: "root",

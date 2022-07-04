@@ -67,6 +67,20 @@ const Span = ({ span, root }) => {
   );
 };
 
+const Navigator = () => {
+  return (
+    <nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 dark:bg-gray-800">
+      <div className="container flex flex-wrap items-start">
+        <a href="/" className="flex">
+          <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+            Tkit Tracing UI
+          </span>
+        </a>
+      </div>
+    </nav>
+  );
+};
+
 export default function App() {
   const [file, setFile] = useState(null);
   const [root, setRoot] = useState(null);
@@ -81,6 +95,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col w-full">
+      <Navigator />
       {!root && <UploadFile file={file} handleUpload={handleUpload} />}
       {root && <SpanContainer root={root} />}
     </div>
