@@ -6,8 +6,26 @@ import TracingView from "./TracingView";
 
 const UploadFile = ({ handleUpload, file }) => {
   return (
-    <div className="flex flex-col justify-content">
+    <div className="flex flex-col items-center">
       <h1>Tkit Tracing for Graylog</h1>
+      <div>Please export Graylog log with these field</div>
+      <ul>
+        {[
+          "message",
+          "timestamp",
+          "ts",
+          "sql",
+          "elapsed",
+          "grpc_service",
+          "grpc_method",
+          "grpc_time_ms",
+        ].map((item) => (
+          <li className="pl-2"> + {item}</li>
+        ))}
+      </ul>
+      <div className="pb-4">
+        After that, export your log to CSV, then drag into this page
+      </div>
       <FileUploader
         multiple={false}
         handleChange={handleUpload}
